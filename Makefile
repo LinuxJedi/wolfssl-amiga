@@ -1,6 +1,6 @@
 CC=m68k-amigaos-gcc
 CFLAGS = -DWOLFSSL_USER_SETTINGS
-CFLAGS += -O2 -mcrt=nix20 -Wno-error=cpp -Wno-missing-braces -m68030 -lm
+CFLAGS += -g -O2 -mcrt=nix20 -Wno-error=cpp -Wno-missing-braces -m68030 -lm -fomit-frame-pointer
 CFLAGS += -Iwolfssl -I.
 
 CSRCS := wolfssl/wolfcrypt/src/rsa.c \
@@ -32,6 +32,7 @@ CSRCS := wolfssl/wolfcrypt/src/rsa.c \
 	wolfssl/wolfcrypt/src/signature.c \
 	wolfssl/wolfcrypt/src/error.c \
 	wolfssl/wolfcrypt/benchmark/benchmark.c \
+	wolfssl/wolfcrypt/test/test.c \
 	main.c
 
 all: wolfbench

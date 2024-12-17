@@ -37,9 +37,8 @@ extern "C" {
 #endif
 
 /* Amiga specific things */
-#define NO_WOLFSSL_DIR
 #define WOLFSSL_NO_FLOAT_FMT
-
+#define BIG_ENDIAN_ORDER
 /* ------------------------------------------------------------------------- */
 /* Platform */
 /* ------------------------------------------------------------------------- */

@@ -2,6 +2,7 @@
 #include <exec/types.h>
 #include <proto/timer.h>
 #include <proto/dos.h>
+#include <wolfcrypt/test/test.h>
 #include <wolfcrypt/benchmark/benchmark.h>
 
 ABSDEF(potgo,  0x00dff034);
@@ -45,5 +46,6 @@ int amiga_rng_gen_block(unsigned char* output, unsigned int sz)
 
 int main(void)
 {
+//    return wolfcrypt_test(NULL);
     return benchmark_test(NULL);
 }
