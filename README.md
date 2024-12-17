@@ -9,4 +9,5 @@ You need [Bebbo's GCC](https://github.com/bebbo/amiga-gcc) compiled and installe
 
 ## Compiling
 
-Make sure `m68k-amigaos-gcc` is in your path, then run `make`.
+First of all run `git submodule update --init --recursive` to get the wolfSSL source code.
+Then make sure `m68k-amigaos-gcc` is in your path, then run `make`.
