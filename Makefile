@@ -1,41 +1,59 @@
 CC=m68k-amigaos-gcc
 CFLAGS = -DWOLFSSL_USER_SETTINGS
-CFLAGS += -g -O2 -mcrt=nix20 -Wno-error=cpp -Wno-missing-braces -m68030 -lm -fomit-frame-pointer -fdata-sections -ffunction-sections -Wl,--gc-sections
+CFLAGS += -g -O2 -mcrt=nix20 -Wno-error=cpp -Wno-missing-braces -m68030 -lm -fomit-frame-pointer
 CFLAGS += -Iwolfssl -I.
 
-CSRCS := wolfssl/wolfcrypt/src/rsa.c \
-	wolfssl/wolfcrypt/src/asn.c \
-	wolfssl/wolfcrypt/src/aes.c \
-	wolfssl/wolfcrypt/src/ecc.c \
-	wolfssl/wolfcrypt/src/chacha.c \
-	wolfssl/wolfcrypt/src/poly1305.c \
-	wolfssl/wolfcrypt/src/chacha20_poly1305.c \
-	wolfssl/wolfcrypt/src/dh.c \
-	wolfssl/wolfcrypt/src/sha.c \
-	wolfssl/wolfcrypt/src/sha256.c \
-	wolfssl/wolfcrypt/src/sha512.c \
-	wolfssl/wolfcrypt/src/integer.c \
-	wolfssl/wolfcrypt/src/tfm.c \
-	wolfssl/wolfcrypt/src/random.c \
-	wolfssl/wolfcrypt/src/logging.c \
-	wolfssl/wolfcrypt/src/memory.c \
-	wolfssl/wolfcrypt/src/coding.c \
-	wolfssl/wolfcrypt/src/hash.c \
-	wolfssl/wolfcrypt/src/kdf.c \
-	wolfssl/wolfcrypt/src/hmac.c \
-	wolfssl/wolfcrypt/src/md5.c \
-	wolfssl/wolfcrypt/src/wc_port.c \
-	wolfssl/wolfcrypt/src/wc_encrypt.c \
-	wolfssl/wolfcrypt/src/wolfmath.c \
-	wolfssl/wolfcrypt/src/sp_c32.c \
-	wolfssl/wolfcrypt/src/sp_int.c \
-	wolfssl/wolfcrypt/src/signature.c \
-	wolfssl/wolfcrypt/src/error.c \
-	wolfssl/wolfcrypt/benchmark/benchmark.c \
-	wolfssl/wolfcrypt/test/test.c \
-	main.c
+OBJECTS := wolfssl/wolfcrypt/src/rsa.o \
+	wolfssl/wolfcrypt/src/asn.o \
+	wolfssl/wolfcrypt/src/aes.o \
+	wolfssl/wolfcrypt/src/ecc.o \
+	wolfssl/wolfcrypt/src/chacha.o \
+	wolfssl/wolfcrypt/src/poly1305.o \
+	wolfssl/wolfcrypt/src/chacha20_poly1305.o \
+	wolfssl/wolfcrypt/src/dh.o \
+	wolfssl/wolfcrypt/src/sha.o \
+	wolfssl/wolfcrypt/src/sha256.o \
+	wolfssl/wolfcrypt/src/sha512.o \
+	wolfssl/wolfcrypt/src/integer.o \
+	wolfssl/wolfcrypt/src/tfm.o \
+	wolfssl/wolfcrypt/src/random.o \
+	wolfssl/wolfcrypt/src/logging.o \
+	wolfssl/wolfcrypt/src/memory.o \
+	wolfssl/wolfcrypt/src/coding.o \
+	wolfssl/wolfcrypt/src/hash.o \
+	wolfssl/wolfcrypt/src/kdf.o \
+	wolfssl/wolfcrypt/src/hmac.o \
+	wolfssl/wolfcrypt/src/md5.o \
+	wolfssl/wolfcrypt/src/wc_port.o \
+	wolfssl/wolfcrypt/src/wc_encrypt.o \
+	wolfssl/wolfcrypt/src/wolfmath.o \
+	wolfssl/wolfcrypt/src/sp_c32.o \
+	wolfssl/wolfcrypt/src/sp_int.o \
+	wolfssl/wolfcrypt/src/signature.o \
+	wolfssl/wolfcrypt/src/error.o \
+	wolfssl/wolfcrypt/benchmark/benchmark.o \
+	wolfssl/wolfcrypt/test/test.o \
+	amirng.o
 
-all: wolfbench
+BENCH_OBJECTS := bench.o
 
-wolfbench: $(CSRCS)
-	$(CC) $(CFLAGS) $^ -o wolfbench
+TEST_OBJECTS := test.o
+
+all: wolfbench wolftest
+
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+wolfbench: $(OBJECTS) $(BENCH_OBJECTS)
+	$(CC) $(OBJECTS) $(BENCH_OBJECTS) $(CFLAGS) -o $@
+
+wolftest: $(OBJECTS) $(TEST_OBJECTS)
+	$(CC) $(OBJECTS) $(TEST_OBJECTS) $(CFLAGS) -o $@
+
+clean:
+	-rm -f $(OBJECTS)
+	-rm -f wolfbench
+	-rm -f wolftest
+
+check:
+	vamos -C 68040 -m4096 -s32 wolftest

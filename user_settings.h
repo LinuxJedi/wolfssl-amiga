@@ -418,6 +418,7 @@ extern "C" {
 
 /* Choose RNG method */
 #if 0
+    #define WOLFSSL_GENSEED_FORTEST
     /* Custom Seed Source */
     #if 0
         /* Size of returned HW RNG value */

@@ -17,12 +17,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+#include <stdio.h>
 #include <stabs.h>
 #include <exec/types.h>
+#include <exec/memory.h>
 #include <proto/timer.h>
 #include <proto/dos.h>
-#include <wolfcrypt/test/test.h>
-#include <wolfcrypt/benchmark/benchmark.h>
+#include <proto/exec.h>
+#include "amirng.h"
 
 ABSDEF(potgo,  0x00dff034);
 ABSDEF(pot1dat,0x00dff014);
@@ -31,6 +33,44 @@ ABSDEF(joy0dat,0x00dff00a);
 volatile UWORD joy0dat;
 volatile UWORD pot1dat;
 volatile UWORD potgo;
+ULONG last_time = 0;
+struct timerequest* timereq = NULL;
+struct MsgPort *port = NULL;
+struct Device * TimerBase = NULL;
+
+int init_rng()
+{
+	port = CreateMsgPort();
+	if (!port) {
+		printf("Couldn't create message port!\n");
+		return 1;
+	}
+	timereq = (struct timerequest*) AllocMem(sizeof(struct timerequest), MEMF_CLEAR|MEMF_PUBLIC);
+	if (!timereq) {
+		printf("Couldn't alloc timerequest!\n");
+		return 1;
+	}
+
+	uint32_t error = OpenDevice("timer.device", UNIT_WAITECLOCK, &timereq->tr_node, 0);
+	if (error > 0) {
+		printf("Couldn't open timer.device %d!\n", error);
+		return 1;
+	}
+	TimerBase = (struct Device*) timereq->tr_node.io_Device;
+	timereq->tr_node.io_Message.mn_ReplyPort = port;
+	timereq->tr_node.io_Command = TR_ADDREQUEST;
+	return 0;
+}
+void free_rng()
+{
+	if (timereq) {
+		CloseDevice(&timereq->tr_node);
+		FreeMem(timereq, sizeof(struct timerequest));
+	}
+	if (port) {
+		DeleteMsgPort(port);
+	}
+}
 
 /* Cannot use h/v sync positions for entropy because:
  * 1. The OS might be using the CIA timers for something else
@@ -42,13 +82,14 @@ volatile UWORD potgo;
  */
 UBYTE amiga_rng(void)
 {
-    struct Device * TimerBase = DOSBase->dl_TimeReq->tr_node.io_Device;
     struct EClockVal clockval;
     UBYTE rng_out;
     UWORD old_pot = potgo;
-
-    potgo &= 0x0fff;
-    unsigned int m_result = ReadEClock(&clockval);
+    potgo = 0x0fff;
+	do {
+		ReadEClock(&clockval);
+	} while (clockval.ev_lo == last_time);
+	last_time = clockval.ev_lo;
     rng_out = pot1dat ^ joy0dat ^ clockval.ev_lo;
     potgo = old_pot;
     return rng_out;
@@ -61,10 +102,4 @@ int amiga_rng_gen_block(unsigned char* output, unsigned int sz)
         output[i] = amiga_rng();
     }
     return 0;
-}
-
-int main(void)
-{
-//    return wolfcrypt_test(NULL);
-    return benchmark_test(NULL);
 }
