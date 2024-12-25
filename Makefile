@@ -1,6 +1,6 @@
 CC=m68k-amigaos-gcc
 CFLAGS = -DWOLFSSL_USER_SETTINGS
-CFLAGS += -g -O2 -mcrt=nix20 -Wno-error=cpp -Wno-missing-braces -m68030 -lm -fomit-frame-pointer
+CFLAGS += -O2 -mcrt=nix20 -Wno-error=cpp -Wno-missing-braces -m68030 -lm -fomit-frame-pointer -flto
 CFLAGS += -Iwolfssl -I.
 
 OBJECTS := wolfssl/wolfcrypt/src/rsa.o \
